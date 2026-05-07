@@ -12,15 +12,15 @@ NIconButtonHot {
   readonly property string remainingText: main ? main.formatRemaining() : ""
 
   function buildTooltip() {
-    if (!active) return pluginApi?.tr("tooltip.off") ?? "";
+    if (!active) return pluginApi?.tr("tooltip.off");
     const tgKey = (main && main.thermalGuardActive)
       ? "tooltip.thermal-guard-on"
       : "tooltip.thermal-guard-off";
     return pluginApi?.tr("tooltip.active", {
       scope: scope,
       remaining: remainingText,
-      tg: pluginApi?.tr(tgKey) ?? ""
-    }) ?? "";
+      tg: pluginApi?.tr(tgKey)
+    });
   }
 
   icon:        active ? "coffee" : "coffee-off"

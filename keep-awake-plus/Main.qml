@@ -71,12 +71,12 @@ Item {
   onActiveChanged: {
     if (_firstStatusApplied) {
       if (active) {
-        const label = (endEpoch === null) ? (pluginApi?.tr("panel.unlimited") ?? "∞") : durationLabel;
+        const label = (endEpoch === null) ? pluginApi?.tr("panel.unlimited") : durationLabel;
         const descKey = (scope === "full") ? "toast.enabled-desc-full" : "toast.enabled-desc-partial";
-        const desc = pluginApi?.tr(descKey, { scope: scope, label: label }) ?? "";
-        ToastService.showNotice(pluginApi?.tr("toast.enabled-title") ?? "", desc, "coffee");
+        const desc = pluginApi?.tr(descKey, { scope: scope, label: label });
+        ToastService.showNotice(pluginApi?.tr("toast.enabled-title"), desc, "coffee");
       } else {
-        ToastService.showNotice(pluginApi?.tr("toast.disabled-title") ?? "", "", "coffee-off");
+        ToastService.showNotice(pluginApi?.tr("toast.disabled-title"), "", "coffee-off");
       }
     }
   }
@@ -214,8 +214,8 @@ Item {
     Quickshell.execDetached([root.scriptPath, "extend", String(seconds), "--silent"]);
     const mins = Math.floor(seconds / 60);
     ToastService.showNotice(
-      pluginApi?.tr("toast.extended-title") ?? "",
-      pluginApi?.tr("toast.extended-desc", { minutes: mins }) ?? "",
+      pluginApi?.tr("toast.extended-title"),
+      pluginApi?.tr("toast.extended-desc", { minutes: mins }),
       "clock-plus");
     Qt.callLater(root._pollStatus);
   }
