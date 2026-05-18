@@ -13,7 +13,8 @@
     "copyField": "{key} kopyala",
     "typeField": "{key} yaz",
     "copyOtp": "OTP kopyala",
-    "typeOtp": "OTP yaz"
+    "typeOtp": "OTP yaz",
+    "otpDesc": "Mevcut OTP kodunu kopyala/yaz"
   },
   "settings": {
     "storePath": {

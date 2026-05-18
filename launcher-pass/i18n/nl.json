@@ -13,7 +13,8 @@
     "copyField": "{key} kopiëren",
     "typeField": "{key} typen",
     "copyOtp": "OTP kopiëren",
-    "typeOtp": "OTP typen"
+    "typeOtp": "OTP typen",
+    "otpDesc": "Huidige OTP-code kopiëren/typen"
   },
   "settings": {
     "storePath": {

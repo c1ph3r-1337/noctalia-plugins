@@ -13,7 +13,8 @@
     "copyField": "Copier {key}",
     "typeField": "Saisir {key}",
     "copyOtp": "Copier OTP",
-    "typeOtp": "Saisir OTP"
+    "typeOtp": "Saisir OTP",
+    "otpDesc": "Copier/saisir le code OTP actuel"
   },
   "settings": {
     "storePath": {

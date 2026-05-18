@@ -13,7 +13,8 @@
     "copyField": "Copia {key}",
     "typeField": "Digita {key}",
     "copyOtp": "Copia OTP",
-    "typeOtp": "Digita OTP"
+    "typeOtp": "Digita OTP",
+    "otpDesc": "Copia/digita codice OTP attuale"
   },
   "settings": {
     "storePath": {

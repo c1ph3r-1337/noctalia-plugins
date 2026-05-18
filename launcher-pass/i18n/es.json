@@ -13,7 +13,8 @@
     "copyField": "Copiar {key}",
     "typeField": "Escribir {key}",
     "copyOtp": "Copiar OTP",
-    "typeOtp": "Escribir OTP"
+    "typeOtp": "Escribir OTP",
+    "otpDesc": "Copiar/escribir código OTP actual"
   },
   "settings": {
     "storePath": {

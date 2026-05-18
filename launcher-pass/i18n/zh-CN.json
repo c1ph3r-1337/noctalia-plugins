@@ -13,7 +13,8 @@
     "copyField": "复制{key}",
     "typeField": "输入{key}",
     "copyOtp": "复制 OTP",
-    "typeOtp": "输入 OTP"
+    "typeOtp": "输入 OTP",
+    "otpDesc": "复制/输入当前 OTP 码"
   },
   "settings": {
     "storePath": {

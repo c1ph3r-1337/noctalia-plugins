@@ -11,7 +11,10 @@
     "typePassword": "Type Password",
     "typePasswordDesc": "Type password using wtype",
     "copyField": "Copy {key}",
-    "typeField": "Type {key}"
+    "typeField": "Type {key}",
+    "copyOtp": "Copy OTP",
+    "typeOtp": "Type OTP",
+    "otpDesc": "Copy/type current OTP code"
   },
   "settings": {
     "storePath": {

@@ -13,7 +13,8 @@
     "copyField": "Копировать {key}",
     "typeField": "Ввести {key}",
     "copyOtp": "Копировать OTP",
-    "typeOtp": "Ввести OTP"
+    "typeOtp": "Ввести OTP",
+    "otpDesc": "Копировать/ввести текущий OTP-код"
   },
   "settings": {
     "storePath": {

@@ -13,7 +13,8 @@
     "copyField": "{key}をコピー",
     "typeField": "{key}を入力",
     "copyOtp": "OTPをコピー",
-    "typeOtp": "OTPを入力"
+    "typeOtp": "OTPを入力",
+    "otpDesc": "現在のOTPコードをコピー/入力"
   },
   "settings": {
     "storePath": {

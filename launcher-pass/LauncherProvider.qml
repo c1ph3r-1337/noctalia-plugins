@@ -48,7 +48,7 @@ Item {
     stdout: StdioCollector {}
     onExited: function(exitCode, exitStatus) {
       if (exitCode === 0) {
-        parseEntries(searchAllProc.stdout.text, true)
+        parseEntries(searchAllProc.stdout.text, false)
       }
       loaded = true
       if (launcher) launcher.updateResults()
@@ -79,9 +79,15 @@ Item {
       if (exitCode === 0) {
         var otp = otpProc.stdout.text.trim()
         root.selectedEntry.data.otp = otp
-        if (launcher) {
-          launcher.updateResults()
+        if (root.selectedField === "otp") {
+          var escapedValue = otp.replace(/'/g, "'\\''")
+          copyProc.exec(["sh", "-c", "printf '%s' '" + escapedValue + "' | wl-copy"])
+        } else if (root.selectedField === "otp-type") {
+          var escValue = otp.replace(/'/g, "'\\''")
+          copyProc.exec(["sh", "-c", "printf '%s' '" + escValue + "' | wtype -"])
         }
+        root.resetDetailMode()
+        launcher.close()
       }
     }
   }
@@ -91,7 +97,9 @@ Item {
   Process {
     id: copyProc
     onExited: function(exitCode, exitStatus) {
-      ToastService.showNotice(pluginApi?.tr("notification.copied") || "Copied to clipboard")
+      if (root.selectedField !== "otp" && root.selectedField !== "otp-type") {
+        ToastService.showNotice(pluginApi?.tr("notification.copied") || "Copied to clipboard")
+      }
     }
   }
 
@@ -101,15 +109,17 @@ Item {
     listProc.exec(["find", escapedPath, "-maxdepth", "1", "-type", "f", "-name", "*.gpg", "-printf", "%f\n", "-o", "-maxdepth", "1", "-type", "d", "-not", "-name", ".*", "-printf", "%f/\n"])
   }
 
-  function searchAllPasswords() {
-    var escapedStore = passwordStoreDir.replace(/'/g, "'\\''")
-    searchAllProc.exec(["find", escapedStore, "-type", "f", "-name", "*.gpg", "-printf", "%P\n"])
+  function searchCurrentDir() {
+    var targetPath = currentPath === "" ? passwordStoreDir : passwordStoreDir + "/" + currentPath
+    var escapedPath = targetPath.replace(/'/g, "'\\''")
+    searchAllProc.exec(["find", escapedPath, "-type", "f", "-name", "*.gpg", "-printf", "%P\n"])
   }
 
   function parseEntries(text, isSearch) {
     var lines = text.split('\n').filter(function(l) { return l.trim() !== "" })
     var entries = []
     var seenDirs = {}
+    var currentName = currentPath === "" ? "" : currentPath.split("/").pop()
 
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i].trim()
@@ -120,6 +130,10 @@ Item {
 
       if (!isDir && name.endsWith('.gpg')) {
         name = name.slice(0, -4)
+      }
+
+      if (name === currentName && isDir) {
+        continue
       }
 
       var fullPath = currentPath === "" ? name : currentPath + "/" + name
@@ -142,7 +156,7 @@ Item {
 
       entries.push({
         "name": name,
-        "fullPath": isSearch ? name : fullPath,
+        "fullPath": fullPath,
         "isDir": isDir,
         "isPassword": !isDir
       })
@@ -159,7 +173,7 @@ Item {
   function init() {
     loaded = false
     if (searchQuery !== "") {
-      searchAllPasswords()
+      searchCurrentDir()
     } else {
       listCurrentDir()
     }
@@ -198,6 +212,13 @@ Item {
       var prev = entryStack.pop()
       currentPath = prev.path
       searchQuery = prev.query
+      if (launcher) {
+        if (searchQuery !== "") {
+          launcher.setSearchText(">pass " + searchQuery)
+        } else {
+          launcher.setSearchText(">pass ")
+        }
+      }
       init()
     }
   }
@@ -221,8 +242,7 @@ Item {
     var lines = output.split('\n')
     var data = {
       "password": "",
-      "fields": [],
-      "otp": null
+      "fields": []
     }
 
     var passwordLine = true
@@ -446,36 +466,34 @@ Item {
       }()
     })
 
-    if (data.otp !== null && data.otp !== undefined) {
-      var otpRef = { "path": path, "otp": true }
-      results.push({
-        "name": pluginApi?.tr("action.copyOtp") || "Copy OTP",
-        "description": data.otp,
-        "icon": "copy",
-        "isTablerIcon": true,
-        "singleLine": true,
-        "onActivate": function() {
-          var o = otpRef
-          return function() {
-            root.copyOtp(o.path)
-          }
-        }()
-      })
+    var otpRef = { "path": path }
+    results.push({
+      "name": pluginApi?.tr("action.copyOtp") || "Copy OTP",
+      "description": pluginApi?.tr("action.otpDesc") || "Copy current OTP code",
+      "icon": "copy",
+      "isTablerIcon": true,
+      "singleLine": true,
+      "onActivate": function() {
+        var o = otpRef
+        return function() {
+          root.copyOtp(o.path)
+        }
+      }()
+    })
 
-      results.push({
-        "name": pluginApi?.tr("action.typeOtp") || "Type OTP",
-        "description": data.otp,
-        "icon": "typography",
-        "isTablerIcon": true,
-        "singleLine": true,
-        "onActivate": function() {
-          var o = otpRef
-          return function() {
-            root.typeOtp(o.path)
-          }
-        }()
-      })
-    }
+    results.push({
+      "name": pluginApi?.tr("action.typeOtp") || "Type OTP",
+      "description": pluginApi?.tr("action.otpDesc") || "Type current OTP code",
+      "icon": "typography",
+      "isTablerIcon": true,
+      "singleLine": true,
+      "onActivate": function() {
+        var o = otpRef
+        return function() {
+          root.typeOtp(o.path)
+        }
+      }()
+    })
 
     for (var i = 0; i < data.fields.length; i++) {
       var field = data.fields[i]
@@ -517,7 +535,6 @@ Item {
     showProcPath = path
     var escapedPath = path.replace(/'/g, "'\\''")
     showProc.exec(["pass", "show", escapedPath])
-    otpProc.exec(["pass", "otp", escapedPath])
   }
 
   function copyField(path, field) {
@@ -549,19 +566,15 @@ Item {
   }
 
   function copyOtp(path) {
-    var otp = root.selectedEntry ? root.selectedEntry.data.otp : ""
-    var escapedValue = otp.replace(/'/g, "'\\''")
-    copyProc.exec(["sh", "-c", "printf '%s' '" + escapedValue + "' | wl-copy"])
-    root.resetDetailMode()
-    launcher.close()
+    root.selectedField = "otp"
+    var escapedPath = path.replace(/'/g, "'\\''")
+    otpProc.exec(["pass", "otp", escapedPath])
   }
 
   function typeOtp(path) {
-    var otp = root.selectedEntry ? root.selectedEntry.data.otp : ""
-    var escapedValue = otp.replace(/'/g, "'\\''")
-    copyProc.exec(["sh", "-c", "printf '%s' '" + escapedValue + "' | wtype -"])
-    root.resetDetailMode()
-    launcher.close()
+    root.selectedField = "otp-type"
+    var escapedPath = path.replace(/'/g, "'\\''")
+    otpProc.exec(["pass", "otp", escapedPath])
   }
 
   function resetDetailMode() {
