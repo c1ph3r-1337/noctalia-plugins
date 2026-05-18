@@ -5,16 +5,21 @@
   "minNoctaliaVersion": "4.7.7",
   "author": "Marco Melletti",
   "license": "MIT",
-  "repository": "https://gitlab.com/mellotanica/noctalia-launcher-pass",
+  "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "description": "Noctalia Launcher gnu pass provider",
+  "tags": ["Launcher"],
   "entryPoints": {
     "main": "Main.qml",
-    "launcherProvider": "LauncherProvider.qml"
+    "launcherProvider": "LauncherProvider.qml",
+    "settings": "Settings.qml"
   },
   "dependencies": {
     "plugins": []
   },
   "metadata": {
-    "commandPrefix": "pass"
+    "commandPrefix": "pass",
+    "defaultSettings": {
+      "storePath": ""
+    }
   }
 }

@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Services.UI
 
 Item {
   id: root
@@ -19,7 +20,13 @@ Item {
   property var entryStack: ([])
   property string searchQuery: ""
 
+  property bool isDetailMode: false
+  property var selectedEntry: null
+  property var selectedField: null
+
   readonly property string passwordStoreDir: {
+    var configured = pluginApi?.pluginSettings?.storePath || pluginApi?.manifest?.metadata?.defaultSettings?.storePath || ""
+    if (configured !== "") return configured
     var envHome = Quickshell.env("HOME") || ""
     return envHome + "/.password-store"
   }
@@ -54,21 +61,25 @@ Item {
     onExited: function(exitCode, exitStatus) {
       if (exitCode === 0) {
         var data = parsePassEntry(showProc.stdout.text)
-        showPassEntryDialog(showProcPath, data)
+        root.selectedEntry = { "path": showProcPath, "data": data }
+        root.isDetailMode = true
+        root.selectedField = null
+        if (launcher) {
+          launcher.setSearchText(">pass ")
+          launcher.updateResults()
+        }
       }
     }
   }
 
+  property string showProcPath: ""
+
   Process {
-    id: writeDataProc
+    id: copyProc
     onExited: function(exitCode, exitStatus) {
-      var scriptPath = pluginApi?.pluginDir + "/scripts/pass-dialog.sh" || ""
-      Quickshell.execDetached([scriptPath, lastTmpFile])
+      ToastService.showNotice(pluginApi?.tr("notification.copied") || "Copied to clipboard")
     }
   }
-
-  property string showProcPath: ""
-  property string lastTmpFile: ""
 
   function listCurrentDir() {
     var targetPath = currentPath === "" ? passwordStoreDir : passwordStoreDir + "/" + currentPath
@@ -146,6 +157,9 @@ Item {
     searchQuery = ""
     cachedEntries = []
     loaded = false
+    isDetailMode = false
+    selectedEntry = null
+    selectedField = null
     init()
   }
 
@@ -181,6 +195,8 @@ Item {
     })
     currentPath = path
     searchQuery = ""
+    isDetailMode = false
+    selectedEntry = null
     init()
   }
 
@@ -220,21 +236,50 @@ Item {
       return 1
     }
 
-    var queryIndex = 0
-    var lastMatchIndex = -1
+    var queryParts = query.split(/\s+/).filter(function(p) { return p.length > 0 })
+    if (queryParts.length === 0) {
+      return 1
+    }
 
-    for (var i = 0; i < target.length && queryIndex < query.length; i++) {
-      if (target[i] === query[queryIndex]) {
-        queryIndex++
-        lastMatchIndex = i
+    var targetIndex = 0
+    var lastMatchIndex = -1
+    var lastPartEnd = -1
+
+    for (var p = 0; p < queryParts.length; p++) {
+      var part = queryParts[p]
+      var partMatched = false
+
+      for (var i = targetIndex; i < target.length; i++) {
+        if (target[i] === part[0]) {
+          var match = true
+          for (var j = 1; j < part.length; j++) {
+            if (i + j >= target.length || target[i + j] !== part[j]) {
+              match = false
+              break
+            }
+          }
+          if (match) {
+            if (p === 0 && i === 0) {
+              lastMatchIndex = i
+            } else if (i > lastPartEnd + 1) {
+              lastMatchIndex = i
+            }
+            lastPartEnd = i + part.length - 1
+            targetIndex = i + part.length
+            partMatched = true
+            break
+          }
+        }
+      }
+
+      if (!partMatched) {
+        return 0
       }
     }
 
-    if (queryIndex !== query.length) return 0
-
     var score = 0
 
-    if (target.startsWith(query)) {
+    if (target.startsWith(queryParts[0])) {
       score += 50
     } else if (target.indexOf(query) !== -1) {
       score += 25
@@ -248,7 +293,7 @@ Item {
       score += 5
     }
 
-    score += Math.max(0, 20 - (target.length - query.length) / 2)
+    score += Math.max(0, 20 - (target.length - query.replace(/\s+/g, '').length) / 2)
 
     return score
   }
@@ -258,14 +303,17 @@ Item {
       return []
     }
 
-    if (!searchText.startsWith(">pass ")) {
-      return []
+    if (root.isDetailMode && root.selectedEntry) {
+      return getPasswordFieldResults()
     }
 
     var newQuery = searchText.slice(5).trim()
     if (newQuery !== searchQuery) {
       searchQuery = newQuery
-      init()
+      if (!root.isDetailMode) {
+        selectedEntry = null
+        init()
+      }
     }
 
     if (!loaded) {
@@ -283,7 +331,7 @@ Item {
     if (currentPath !== "" && searchQuery === "") {
       results.push({
         "name": "..",
-        "description": "Go back",
+        "description": pluginApi?.tr("result.goBack") || "Go back",
         "icon": "arrow-left",
         "isTablerIcon": true,
         "singleLine": true,
@@ -309,9 +357,11 @@ Item {
 
     for (var j = 0; j < Math.min(scored.length, 50); j++) {
       var s = scored[j]
-      var capturedEntry = s.entry
+      var entryRef = s.entry
       var icon = s.entry.isDir ? "folder" : "key"
-      var description = s.entry.isDir ? "Folder" : "Password"
+      var description = s.entry.isDir
+        ? (pluginApi?.tr("result.folder") || "Folder")
+        : (pluginApi?.tr("result.password") || "Password")
 
       results.push({
         "name": s.entry.name,
@@ -320,7 +370,7 @@ Item {
         "isTablerIcon": true,
         "singleLine": true,
         "onActivate": function() {
-          var e = capturedEntry
+          var e = entryRef
           return function() {
             if (e.isDir) {
               root.navigateToPath(e.fullPath)
@@ -335,24 +385,122 @@ Item {
     return results
   }
 
-  function showPasswordOptions(path) {
-    launcher.close()
+  function getPasswordFieldResults() {
+    var results = []
+    var data = root.selectedEntry.data
+    var path = root.selectedEntry.path
 
+    results.push({
+      "name": path,
+      "description": pluginApi?.tr("result.passwordEntry") || "Password entry",
+      "icon": "key",
+      "isTablerIcon": true,
+      "singleLine": true,
+      "onActivate": function() {}
+    })
+
+    var passEntryRef = { "path": path, "field": null }
+    results.push({
+      "name": pluginApi?.tr("action.copyPassword") || "Copy Password",
+      "description": pluginApi?.tr("action.copyPasswordDesc") || "Copy password to clipboard",
+      "icon": "copy",
+      "isTablerIcon": true,
+      "singleLine": true,
+      "onActivate": function() {
+        var e = passEntryRef
+        return function() {
+          root.copyField(e.path, null)
+        }
+      }()
+    })
+
+    results.push({
+      "name": pluginApi?.tr("action.typePassword") || "Type Password",
+      "description": pluginApi?.tr("action.typePasswordDesc") || "Type password using wtype",
+      "icon": "typography",
+      "isTablerIcon": true,
+      "singleLine": true,
+      "onActivate": function() {
+        var e = passEntryRef
+        return function() {
+          root.typeField(e.path, null)
+        }
+      }()
+    })
+
+    for (var i = 0; i < data.fields.length; i++) {
+      var field = data.fields[i]
+      var fieldRef = { "path": path, "field": field }
+
+      results.push({
+        "name": pluginApi?.tr("action.copyField", { "key": field.key }) || ("Copy " + field.key),
+        "description": field.value,
+        "icon": "copy",
+        "isTablerIcon": true,
+        "singleLine": true,
+        "onActivate": function() {
+          var f = fieldRef
+          return function() {
+            root.copyField(f.path, f.field)
+          }
+        }()
+      })
+
+      results.push({
+        "name": pluginApi?.tr("action.typeField", { "key": field.key }) || ("Type " + field.key),
+        "description": field.value,
+        "icon": "typography",
+        "isTablerIcon": true,
+        "singleLine": true,
+        "onActivate": function() {
+          var f = fieldRef
+          return function() {
+            root.typeField(f.path, f.field)
+          }
+        }()
+      })
+    }
+
+    return results
+  }
+
+  function showPasswordOptions(path) {
     showProcPath = path
     var escapedPath = path.replace(/'/g, "'\\''")
     showProc.exec(["pass", "show", escapedPath])
   }
 
-  function showPassEntryDialog(path, data) {
-    var dataObj = {
-      "path": path,
-      "password": data.password,
-      "fields": data.fields
+  function copyField(path, field) {
+    var value = ""
+    if (field) {
+      value = field.value
+    } else {
+      value = root.selectedEntry ? root.selectedEntry.data.password : ""
     }
 
-    var dataStr = JSON.stringify(dataObj)
-    lastTmpFile = "/tmp/pass-data-" + Date.now() + "-" + Math.floor(Math.random() * 10000) + ".json"
+    var escapedValue = value.replace(/'/g, "'\\''")
+    copyProc.exec(["sh", "-c", "printf '%s' '" + escapedValue + "' | wl-copy"])
+    root.resetDetailMode()
+    launcher.close()
+  }
 
-    writeDataProc.exec(["sh", "-c", "printf '%s' " + JSON.stringify(dataStr) + " > " + lastTmpFile])
+  function typeField(path, field) {
+    var value = ""
+    if (field) {
+      value = field.value
+    } else {
+      value = root.selectedEntry ? root.selectedEntry.data.password : ""
+    }
+
+    var escapedValue = value.replace(/'/g, "'\\''")
+    copyProc.exec(["sh", "-c", "printf '%s' '" + escapedValue + "' | wtype -"])
+    root.resetDetailMode()
+    launcher.close()
+  }
+
+  function resetDetailMode() {
+    isDetailMode = false
+    selectedEntry = null
+    selectedField = null
   }
 }

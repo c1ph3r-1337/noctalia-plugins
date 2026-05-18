@@ -1,0 +1,25 @@
+{
+  "result": {
+    "goBack": "Go back",
+    "folder": "Folder",
+    "password": "Password",
+    "passwordEntry": "Password entry"
+  },
+  "action": {
+    "copyPassword": "Copy Password",
+    "copyPasswordDesc": "Copy password to clipboard",
+    "typePassword": "Type Password",
+    "typePasswordDesc": "Type password using wtype",
+    "copyField": "Copy {key}",
+    "typeField": "Type {key}"
+  },
+  "settings": {
+    "storePath": {
+      "label": "Password Store Path",
+      "desc": "Custom path to the password store (default: ~/.password-store)"
+    }
+  },
+  "notification": {
+    "copied": "Copied to clipboard"
+  }
+}

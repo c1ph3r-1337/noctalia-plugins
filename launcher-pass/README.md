@@ -5,10 +5,11 @@ A Noctalia launcher provider plugin for GNU Pass password store.
 ## Features
 
 - Browse password store directories
-- Fuzzy search across all passwords
+- Fuzzy search across all passwords (spaces treated as wildcards)
 - Navigate subdirectories
 - Copy/type password or any field from password entries
 - Quick access via `>pass` command
+- Configurable password store path
 
 ## Usage
 
@@ -40,7 +41,7 @@ A Noctalia launcher provider plugin for GNU Pass password store.
 
 ## Configuration
 
-The plugin uses your default GNU Pass password store (`~/.password-store`).
+By default, the plugin uses `~/.password-store`. You can configure a custom path in the plugin settings.
 
 ## Keybinds
 
@@ -48,6 +49,13 @@ The plugin uses your default GNU Pass password store (`~/.password-store`).
 |--------|-------------|
 | `>pass` | Open pass browser |
 | `>pass <query>` | Search passwords |
+
+## Fuzzy Search
+
+Spaces are treated as wildcards. For example, searching `hom comp` will match:
+- `/home/computer/`
+- `/web/home/page/computing.gpg`
+- `/homcomppass.gpg`
 
 ## License
 
