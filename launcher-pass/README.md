@@ -12,6 +12,8 @@ A Noctalia launcher provider plugin for GNU Pass password store.
 - Quick access via `>pass` command
 - Configurable password store path
 
+## Preview
+
 ## Usage
 
 1. Open the launcher with your configured keybind
