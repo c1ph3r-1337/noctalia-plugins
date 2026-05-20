@@ -38,7 +38,7 @@ Item {
     // --- 1. Availability: check binary exists on PATH ---
     Process {
         id: availabilityChecker
-        command: ["sh", "-c", "command -v " + root.wvkbdBinParts[0]]
+        command: ["which", root.wvkbdBinParts[0]]
         onExited: (exitCode, exitStatus) => {
             root.wvkbdOk = exitCode === 0
             if (root.wvkbdOk && !wvkbd.running) preemptChecker.running = true
