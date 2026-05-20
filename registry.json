@@ -686,10 +686,10 @@
     {
       "id": "keybind-cheatsheet",
       "name": "Keybind Cheatsheet",
-      "version": "3.4.0",
+      "version": "3.7.1",
       "official": false,
       "author": "blacku",
-      "description": "Universal keyboard shortcuts keymap that automatically detects and displays keybindings for Hyprland or Niri compositors.",
+      "description": "Universal keyboard shortcuts keymap that automatically detects and displays keybindings for Hyprland, Niri, or MangoWC compositors.",
       "repository": "https://github.com/noctalia-dev/noctalia-plugins",
       "minNoctaliaVersion": "3.6.0",
       "license": "MIT",
@@ -697,9 +697,12 @@
         "Bar",
         "Panel",
         "System",
-        "Indicator"
+        "Indicator",
+        "Hyprland",
+        "Niri",
+        "MangoWC"
       ],
-      "lastUpdated": "2026-04-07T22:03:44+02:00"
+      "lastUpdated": "2026-05-20T21:37:45+02:00"
     },
     {
       "id": "khal-agenda-widget",
