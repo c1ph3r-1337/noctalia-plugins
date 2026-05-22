@@ -21,6 +21,10 @@
     "otpDesc": "复制/输入当前 OTP 码"
   },
   "settings": {
+    "tab": {
+      "general": "通用",
+      "advanced": "高级"
+    },
     "storePath": {
       "label": "密码库路径",
       "desc": "密码库的自定义路径（默认：~/.password-store）"

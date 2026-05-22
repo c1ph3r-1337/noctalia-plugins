@@ -21,6 +21,10 @@
     "otpDesc": "Copier/saisir le code OTP actuel"
   },
   "settings": {
+    "tab": {
+      "general": "Général",
+      "advanced": "Avancé"
+    },
     "storePath": {
       "label": "Chemin du gestionnaire de mots de passe",
       "desc": "Chemin personnalisé vers le gestionnaire de mots de passe (par défaut: ~/.password-store)"

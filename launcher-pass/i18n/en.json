@@ -20,6 +20,10 @@
     "otpDesc": "Copy/type current OTP code"
   },
   "settings": {
+    "tab": {
+      "general": "General",
+      "advanced": "Advanced"
+    },
     "storePath": {
       "label": "Password Store Path",
       "desc": "Custom path to the password store (default: ~/.password-store)"

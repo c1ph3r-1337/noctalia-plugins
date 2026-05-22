@@ -21,6 +21,10 @@
     "otpDesc": "Mevcut OTP kodunu kopyala/yaz"
   },
   "settings": {
+    "tab": {
+      "general": "Genel",
+      "advanced": "Gelişmiş"
+    },
     "storePath": {
       "label": "Parola Deposu Yolu",
       "desc": "Parola deposuna özel yol (varsayılan: ~/.password-store)"

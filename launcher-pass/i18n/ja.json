@@ -21,6 +21,10 @@
     "otpDesc": "現在のOTPコードをコピー/入力"
   },
   "settings": {
+    "tab": {
+      "general": "一般",
+      "advanced": "詳細設定"
+    },
     "storePath": {
       "label": "パスワードストアパス",
       "desc": "パスワードストアへのカスタムパス（デフォルト：~/.password-store）"

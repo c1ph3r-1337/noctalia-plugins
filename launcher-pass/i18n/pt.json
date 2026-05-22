@@ -21,6 +21,10 @@
     "otpDesc": "Copiar/digitar código OTP atual"
   },
   "settings": {
+    "tab": {
+      "general": "Geral",
+      "advanced": "Avançado"
+    },
     "storePath": {
       "label": "Caminho do armazenamento de palavras-passe",
       "desc": "Caminho personalizado para o armazenamento de palavras-passe (predefenido: ~/.password-store)"

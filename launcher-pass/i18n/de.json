@@ -21,6 +21,10 @@
     "otpDesc": "Aktuellen OTP-Code kopieren/eingeben"
   },
   "settings": {
+    "tab": {
+      "general": "Allgemein",
+      "advanced": "Erweitert"
+    },
     "storePath": {
       "label": "Passwort-Speicherpfad",
       "desc": "Benutzerdefinierter Pfad zum Passwort-Speicher (Standard: ~/.password-store)"

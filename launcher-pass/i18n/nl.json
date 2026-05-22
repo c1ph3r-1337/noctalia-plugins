@@ -21,6 +21,10 @@
     "otpDesc": "Huidige OTP-code kopiëren/typen"
   },
   "settings": {
+    "tab": {
+      "general": "Algemeen",
+      "advanced": "Geavanceerd"
+    },
     "storePath": {
       "label": "Wachtwoordopslagpad",
       "desc": "Aangepast pad naar de wachtwoordopslag (standaard: ~/.password-store)"

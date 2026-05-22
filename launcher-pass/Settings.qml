@@ -17,36 +17,72 @@ ColumnLayout {
 
   spacing: Style.marginL
 
-  NTextInput {
+  NTabBar {
+    id: tabBar
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.storePath.label")
-    description: pluginApi?.tr("settings.storePath.desc")
-    text: root.editStorePath
-    onTextChanged: root.editStorePath = text
+    distributeEvenly: true
+    currentIndex: tabView.currentIndex
+
+    NTabButton {
+      text: pluginApi?.tr("settings.tab.general")
+      tabIndex: 0
+      checked: tabBar.currentIndex === 0
+    }
+
+    NTabButton {
+      text: pluginApi?.tr("settings.tab.advanced")
+      tabIndex: 1
+      checked: tabBar.currentIndex === 1
+    }
   }
 
-  NTextInput {
+  NTabView {
+    id: tabView
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.typeDelay.label")
-    description: pluginApi?.tr("settings.typeDelay.desc")
-    text: root.editTypeDelay
-    onTextChanged: root.editTypeDelay = text
-  }
+    Layout.fillHeight: true
+    currentIndex: tabBar.currentIndex
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.wtypeDelay.label")
-    description: pluginApi?.tr("settings.wtypeDelay.desc")
-    text: root.editWtypeDelay
-    onTextChanged: root.editWtypeDelay = text
-  }
+    ColumnLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginL
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.clipTimeout.label")
-    description: pluginApi?.tr("settings.clipTimeout.desc")
-    text: root.editClipTimeout
-    onTextChanged: root.editClipTimeout = text
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.storePath.label")
+        description: pluginApi?.tr("settings.storePath.desc")
+        text: root.editStorePath
+        onTextChanged: root.editStorePath = text
+      }
+
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.clipTimeout.label")
+        description: pluginApi?.tr("settings.clipTimeout.desc")
+        text: root.editClipTimeout
+        onTextChanged: root.editClipTimeout = text
+      }
+    }
+
+    ColumnLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginL
+
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.typeDelay.label")
+        description: pluginApi?.tr("settings.typeDelay.desc")
+        text: root.editTypeDelay
+        onTextChanged: root.editTypeDelay = text
+      }
+
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.wtypeDelay.label")
+        description: pluginApi?.tr("settings.wtypeDelay.desc")
+        text: root.editWtypeDelay
+        onTextChanged: root.editWtypeDelay = text
+      }
+    }
   }
 
   function saveSettings() {

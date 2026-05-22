@@ -21,6 +21,10 @@
     "otpDesc": "Copia/digita codice OTP attuale"
   },
   "settings": {
+    "tab": {
+      "general": "Generale",
+      "advanced": "Avanzate"
+    },
     "storePath": {
       "label": "Percorso dell'archivio password",
       "desc": "Percorso personalizzato all'archivio password (predefinito: ~/.password-store)"

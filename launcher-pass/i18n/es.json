@@ -21,6 +21,10 @@
     "otpDesc": "Copiar/escribir código OTP actual"
   },
   "settings": {
+    "tab": {
+      "general": "General",
+      "advanced": "Avanzado"
+    },
     "storePath": {
       "label": "Ruta del almacén de contraseñas",
       "desc": "Ruta personalizada al almacén de contraseñas (por defecto: ~/.password-store)"
