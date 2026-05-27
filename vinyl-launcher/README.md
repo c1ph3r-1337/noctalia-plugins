@@ -20,6 +20,7 @@ A premium, rotational disk-based application launcher for the **Noctalia** shell
 
 - **💎 Glass-morphism UI**: A stunning semi-transparent disk interface with frosted borders and neon selection glows.
 - **🌀 Physics-based Rotation**: Smooth, momentum-based scrolling designed for mouse, trackpad, and touch.
+- **🎧 DJ Jog Wheel Mode**: Laptop users can use their trackpad like a DJ deck—swipe with two fingers to spin the disk with realistic inertia.
 - **⌨️ Keyboard Optimized**: 
   - **Instant Search**: Start typing to filter apps immediately.
   - **Arrow Navigation**: Use `Left/Right` or `Up/Down` to glide through your apps.
