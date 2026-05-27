@@ -1,0 +1,20 @@
+{
+  "id": "vinyl-launcher",
+  "name": "Vinyl Launcher",
+  "version": "1.0.0",
+  "minNoctaliaVersion": "3.6.0",
+  "author": "c1ph3r",
+  "license": "MIT",
+  "description": "A stylish rotational disk-based application launcher with glass-morphism and smooth animations.",
+  "tags": ["Panel", "Launcher", "Hyprland", "Niri"],
+  "entryPoints": {
+    "main": "Main.qml"
+  },
+  "metadata": {
+    "defaultSettings": {
+      "diskScale": 0.7,
+      "iconSize": 64,
+      "animationDuration": 350
+    }
+  }
+}
