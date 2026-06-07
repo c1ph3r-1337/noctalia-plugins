@@ -12,6 +12,10 @@ Item {
     readonly property var geometryPlaceholder: core
     readonly property bool allowAttach: false
 
+    readonly property bool panelAnchorHorizontalCenter: true
+    readonly property bool panelAnchorVerticalCenter: true
+    readonly property color panelBackgroundColor: "transparent"
+
     property real contentPreferredWidth: Math.round(450 * Style.uiScaleRatio)
     property real contentPreferredHeight: contentPreferredWidth
 

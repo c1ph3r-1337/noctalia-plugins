@@ -9,10 +9,6 @@ Item {
     id: root
     property var pluginApi: null
 
-    readonly property bool panelAnchorHorizontalCenter: true
-    readonly property bool panelAnchorVerticalCenter: true
-    readonly property color panelBackgroundColor: "transparent"
-
     IpcHandler {
         target: "plugin:vinyl-launcher"
 
