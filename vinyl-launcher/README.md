@@ -47,7 +47,7 @@ A premium, rotational disk-based application launcher for the **Noctalia** shell
 ### IPC Command
 You can toggle the launcher via terminal or keybind:
 ```bash
-noctalia-shellctl ipc plugin:vinyl-launcher space
+quickshell -p /path/to/noctalia-shell ipc call plugin:vinyl-launcher space
 ```
 
 ---
