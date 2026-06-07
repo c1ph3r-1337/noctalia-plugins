@@ -159,8 +159,7 @@ Rectangle {
     height: width
     radius: width / 2
     color: Color.mSurface
-    border.color: Color.mBorder
-    border.width: Math.round(1 * Style.uiScaleRatio)
+    border.width: 0
 
     // 2. Inner Light Circle
     Rectangle {
