@@ -155,10 +155,12 @@ Rectangle {
   Rectangle {
     id: outerRing
     anchors.centerIn: parent
-    width: Math.min(parent.width, parent.height) * 0.7
+    width: Math.min(parent.width, parent.height)
     height: width
     radius: width / 2
-    color: "#111111"
+    color: Color.mSurface
+    border.color: Color.mBorder
+    border.width: Math.round(1 * Style.uiScaleRatio)
     
     // 2. Inner Light Circle
     Rectangle {
@@ -167,7 +169,7 @@ Rectangle {
       width: parent.width * 0.6
       height: width
       radius: width / 2
-      color: "#1f1f1f"
+      color: Color.mSurfaceVariant
       z: 5
 
       // 3. Selected app in the VERY center
