@@ -1,29 +1,21 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.Commons
+import qs.Services.UI
 
-// Noctalia Plugin Main Entry
 Item {
-  id: root
+    id: root
+    property var pluginApi: null
 
-  // Reference to the plugin API provided by Noctalia
-  property var pluginApi: null
+    IpcHandler {
+        target: "plugin:vinyl-launcher"
 
-  // Plugin state
-  property bool isOpen: false
-
-  function init() {
-    Logger.i("VinylLauncher", "Plugin initialized");
-  }
-
-  // Handle IPC calls for toggle
-  function toggle() {
-    pluginApi.togglePanel("VinylLauncher");
-  }
-
-  // Setup the panel on the current screen
-  Component.onCompleted: {
-    // Note: Panels in plugins are usually managed via manifest/Noctalia internal
-    // but we can register handlers here.
-  }
+        function space() {
+            Logger.d("Vinyl Launcher", "Opening space launcher through IPC...")
+            if (pluginApi) {
+                pluginApi.togglePanel(null, null)
+            }
+        }
+    }
 }
