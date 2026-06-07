@@ -9,7 +9,6 @@ Item {
     id: root
     property var pluginApi: null
 
-    // FIX: Put these in Main.qml as well to defeat the QML race condition
     readonly property bool allowAttach: false
     readonly property bool panelAnchorHorizontalCenter: true
     readonly property bool panelAnchorVerticalCenter: true
@@ -21,6 +20,7 @@ Item {
         function space() {
             Logger.d("Vinyl Launcher", "Opening space launcher through IPC...")
             if (pluginApi) {
+                pluginApi.togglePanel(null, null)
                 IPCService.screenDetector.withCurrentScreen(screen => {
                     pluginApi.togglePanel(screen, null)
                 }, false)
