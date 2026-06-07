@@ -1,89 +1,43 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 
-import "Providers"
 import qs.Commons
+import qs.Modules.Panels.Launcher.Providers
 import qs.Services.Keyboard
 import qs.Services.UI
 import qs.Widgets
 
-// Space launcher core - Rotational Disk UI (Fixed Initialization)
+// Noctalia Plugin Version of Vinyl Launcher
 Rectangle {
   id: root
+  anchors.fill: parent
   color: "transparent"
 
-  // External interface - set by parent
-  property var screen: null
-  property bool isOpen: false
-  signal requestClose
-  signal requestCloseImmediately
-
-  function closeImmediately() {
-    requestCloseImmediately();
-  }
+  // Plugin API property (automatically injected by Noctalia)
+  property var pluginApi: null
+  
+  // Shortcuts to settings
+  readonly property var cfg: pluginApi?.pluginSettings || ({})
+  readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  
+  // Set diskScale default to 1.0 to perfectly match the 450px bounds
+  readonly property real diskScale: cfg.diskScale ?? defaults.diskScale ?? 1.0
+  readonly property int iconSize: cfg.iconSize ?? defaults.iconSize ?? 64
 
   // State
   property string searchText: ""
-  property int selectedIndex: 0
   property var results: []
-  property var providers: []
-  property var activeProvider: null
-  property bool resultsReady: false
-  property bool ignoreMouseHover: true
+  property int selectedIndex: 0
+  property bool isOpen: false
 
-  readonly property bool animationsDisabled: Settings.data.general.animationDisabled
-
-  readonly property var defaultProvider: appsProvider
-  readonly property var currentProvider: activeProvider || defaultProvider
-
-  // Providers
+  // Use Noctalia's native apps provider for best results
   ApplicationsProvider {
     id: appsProvider
     onEntriesChanged: root.updateResults()
-    Component.onCompleted: {
-      registerProvider(this);
-    }
-  }
-
-  // Lifecycle
-  onIsOpenChanged: {
-    if (isOpen) {
-      onOpened();
-    } else {
-      onClosed();
-    }
-  }
-
-  onSearchTextChanged: {
-    if (isOpen) {
-      updateResults();
-    }
-  }
-
-  function onOpened() {
-    resultsReady = true;
-    // Delay update slightly to ensure provider is ready
-    Qt.callLater(updateResults);
-    searchInput.inputItem.forceActiveFocus();
-  }
-
-  function onClosed() {
-    searchText = "";
-  }
-
-  function close() {
-    requestClose();
-  }
-
-  // Provider registration
-  function registerProvider(provider) {
-    providers.push(provider);
-    provider.launcher = root;
-    if (provider.init)
-      provider.init();
   }
 
   function updateResults() {
@@ -91,20 +45,33 @@ Rectangle {
     selectedIndex = 0;
   }
 
+  onSearchTextChanged: updateResults()
+  
+  onIsOpenChanged: {
+    if (!isOpen) {
+      searchText = ""
+    } else {
+      updateResults()
+      Qt.callLater(() => {
+         if (searchInput && searchInput.inputItem) searchInput.inputItem.forceActiveFocus();
+      })
+    }
+  }
+
   function activate() {
     const idx = diskView.currentIndex;
     if (results && results.length > 0 && idx >= 0 && idx < results.length) {
       const item = results[idx];
       if (item && item.onActivate) {
-        Logger.d("LauncherSpace", "Calling onActivate for: " + item.name);
         item.onActivate();
       }
+      // Note: item.onActivate in Noctalia already handles closing panels
     }
   }
 
   function handleKeyPress(event) {
     if (Keybinds.checkKey(event, 'escape', Settings)) {
-      close();
+      if (pluginApi) pluginApi.togglePanel("VinylLauncher");
       event.accepted = true;
       return;
     }
@@ -130,59 +97,51 @@ Rectangle {
     }
   }
 
-  // ==================== UI Content ====================
-
-  // 0. Hidden Search Input
+  // Search Input (Hidden)
   NTextInput {
     id: searchInput
-    width: 0
-    height: 0
-    opacity: 0
+    width: 0; height: 0; opacity: 0
     text: root.searchText
     onTextChanged: root.searchText = text
-    onAccepted: root.activate()
-
+    
     Component.onCompleted: {
-      if (searchInput.inputItem) {
-        searchInput.inputItem.Keys.onPressed.connect(function (event) {
-          root.handleKeyPress(event);
-        });
+      if (inputItem) {
+        inputItem.forceActiveFocus();
+        inputItem.Keys.onPressed.connect((event) => root.handleKeyPress(event));
       }
     }
   }
 
-  // 1. Outer Dark Ring
+  // Visuals
   Rectangle {
     id: outerRing
     anchors.centerIn: parent
-    width: Math.min(parent.width, parent.height)
+    width: Math.min(parent.width, parent.height) * root.diskScale
     height: width
     radius: width / 2
-    color: Color.mSurface
-    border.color: Color.mBorder
-    border.width: Math.round(1 * Style.uiScaleRatio)
+    color: Qt.alpha(Color.mSurface, 0.4)
+    border.width: 0 // Removed thin border line
     
-    // 2. Inner Light Circle
     Rectangle {
       id: innerCircle
       anchors.centerIn: parent
-      width: parent.width * 0.6
+      width: parent.width * 0.55
       height: width
       radius: width / 2
-      color: Color.mSurfaceVariant
+      color: Qt.alpha(Color.mSurface, 0.8)
       z: 5
+      border.color: Color.mPrimary
+      border.width: 2
 
-      // 3. Selected app in the VERY center
       ColumnLayout {
         anchors.centerIn: parent
         spacing: Style.marginS
-        width: parent.width * 0.7
+        width: parent.width * 0.8
 
         Item {
-          Layout.preferredWidth: parent.width * 0.5
+          Layout.preferredWidth: parent.width * 0.55
           Layout.preferredHeight: width
           Layout.alignment: Qt.AlignHCenter
-
           IconImage {
             anchors.fill: parent
             source: diskView.currentItemData ? ThemeIcons.iconFromName(diskView.currentItemData.icon, "application-x-executable") : ""
@@ -202,143 +161,76 @@ Rectangle {
       }
     }
 
-    // 4. Icons rotating on the dark ring
     PathView {
       id: diskView
       anchors.fill: parent
       model: root.results
       z: 10
       interactive: false
-
-      // DJ Momentum System
-      property real velocity: 0
-      property var lastTime: 0
       
-      Timer {
-        id: inertiaTimer
-        interval: 16
-        repeat: true
-        onTriggered: {
-          diskView.offset += diskView.velocity;
-          diskView.velocity *= 0.94; // Deceleration
-          if (Math.abs(diskView.velocity) < 0.01) {
-            diskView.velocity = 0;
-            diskView.offset = Math.round(diskView.offset);
-            stop();
-          }
-        }
-      }
+      property var currentItemData: model && model.length > 0 ? model[currentIndex] : null
 
       NumberAnimation {
         id: offsetAnim
         target: diskView
         property: "offset"
-        duration: 350
+        duration: cfg.animationDuration ?? 350
         easing.type: Easing.OutQuart
       }
 
-      DragHandler {
-        id: djDrag
-        onActiveChanged: {
-          if (active) {
-            inertiaTimer.stop();
-            diskView.velocity = 0;
-            diskView.lastTime = Date.now();
-          } else {
-            inertiaTimer.start();
-          }
-        }
-        onTranslationChanged: {
-          let now = Date.now();
-          let dt = (now - diskView.lastTime) / 1000.0;
-          if (dt > 0) {
-            let sens = 40.0 * Style.uiScaleRatio;
-            let delta = -(translation.x + translation.y) / sens;
-            diskView.velocity = delta / (dt * 60); // Simple velocity estimation
-            diskView.offset += delta;
-            diskView.lastTime = now;
+      property real velocity: 0
+      Timer {
+        id: inertiaTimer
+        interval: 16; repeat: true
+        onTriggered: {
+          diskView.offset += diskView.velocity
+          diskView.velocity *= 0.96
+          if (Math.abs(diskView.velocity) < 0.01) {
+            diskView.velocity = 0; diskView.offset = Math.round(diskView.offset); stop()
           }
         }
       }
 
-      WheelHandler {
-        acceptedDevices: PointerDevice.TouchPad | PointerDevice.Mouse
-        onWheel: (event) => {
-          inertiaTimer.stop();
-          let sens = 40.0 * Style.uiScaleRatio;
-          let dx = event.pixelDelta.x !== 0 ? event.pixelDelta.x : event.angleDelta.x / 8.0;
-          let dy = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.angleDelta.y / 8.0;
-          let delta = -(dx + dy) / sens;
-          
-          diskView.offset += delta;
-          diskView.velocity = delta * 2.5;
-          inertiaTimer.start();
-        }
-      }
-      
-      property var currentItemData: model && model.length > 0 ? model[currentIndex] : null
-      onCurrentIndexChanged: root.selectedIndex = currentIndex
-
-      highlightMoveDuration: 250
       pathItemCount: Math.min(model.length, 12)
-      preferredHighlightBegin: 0.5
-      preferredHighlightEnd: 0.5
+      preferredHighlightBegin: 0.5; preferredHighlightEnd: 0.5
       highlightRangeMode: PathView.StrictlyEnforceRange
 
       path: Path {
-        startX: outerRing.width / 2
-        startY: outerRing.height * 0.1
-        
+        startX: outerRing.width / 2; startY: outerRing.height * 0.1
         PathAngleArc {
-          centerX: outerRing.width / 2
-          centerY: outerRing.height / 2
-          radiusX: outerRing.width * 0.4
-          radiusY: outerRing.height * 0.4
-          startAngle: -90
-          sweepAngle: 360
+          centerX: outerRing.width / 2; centerY: outerRing.height / 2
+          radiusX: outerRing.width * 0.4; radiusY: outerRing.height * 0.4
+          startAngle: -90; sweepAngle: 360
         }
       }
 
       delegate: Item {
-        id: delegateRoot
-        width: 64 * Style.uiScaleRatio
+        width: root.iconSize * Style.uiScaleRatio
         height: width
-        scale: PathView.isCurrentItem ? 1.2 : 0.8
-        opacity: PathView.isCurrentItem ? 0.0 : 1.0 
-        
+        scale: PathView.isCurrentItem ? 1.3 : 0.8
+        opacity: PathView.isCurrentItem ? 0.0 : 1.0
         Behavior on opacity { NumberAnimation { duration: 150 } }
         Behavior on scale { NumberAnimation { duration: 150 } }
 
-        required property var modelData
-
         IconImage {
           anchors.fill: parent
-          source: ThemeIcons.iconFromName(modelData.icon, "application-x-executable")
-        }
-
-        TapHandler {
-          onTapped: {
-            if (diskView.currentIndex === index) {
-              root.activate();
-            } else {
-              diskView.currentIndex = index;
-            }
-          }
+          source: modelData.icon ? ThemeIcons.iconFromName(modelData.icon, "application-x-executable") : ""
         }
       }
     }
   }
 
-  // 5. Visible Search Bar (Small, at the bottom of the disk)
+  // Search Bar
   NBox {
     anchors.top: outerRing.bottom
     anchors.topMargin: Style.marginL
     anchors.horizontalCenter: parent.horizontalCenter
-    width: 250 * Style.uiScaleRatio
-    height: 35 * Style.uiScaleRatio
+    width: 280 * Style.uiScaleRatio; height: 40 * Style.uiScaleRatio
     radius: Style.radiusM
-    color: "#1f1f1f"
-    visible: root.searchText !== "" 
+    color: Qt.alpha(Color.mSurface, 0.8)
+    visible: root.searchText !== ""
+    border.color: Qt.alpha(Color.mOutline, 0.5)
+    border.width: 1
 
     NText {
       anchors.centerIn: parent

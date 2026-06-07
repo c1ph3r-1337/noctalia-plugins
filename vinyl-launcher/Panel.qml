@@ -19,24 +19,17 @@ Item {
     property real contentPreferredWidth: Math.round(450 * Style.uiScaleRatio)
     property real contentPreferredHeight: contentPreferredWidth
 
-    anchors.fill: parent
+    // Provide explicit implicit bounds so SmartPanel does not collapse it if it somehow attaches
+    implicitWidth: contentPreferredWidth
+    implicitHeight: contentPreferredHeight
 
     VinylCore {
         id: core
         anchors.fill: parent
-        screen: root.screen
-        isOpen: pluginApi ? (pluginApi.panelOpenScreen !== null) : false
-
-        onRequestClose: {
-            if (pluginApi && root.screen) {
-                pluginApi.closePanel(root.screen)
-            }
-        }
-
-        onRequestCloseImmediately: {
-            if (pluginApi && root.screen) {
-                pluginApi.closePanel(root.screen)
-            }
-        }
+        
+        // Explicitly pass pluginApi to VinylCore so it can access settings and functions
+        pluginApi: root.pluginApi
+        
+        isOpen: root.pluginApi ? (root.pluginApi.panelOpenScreen !== null) : false
     }
 }

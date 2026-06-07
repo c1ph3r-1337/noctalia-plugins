@@ -9,6 +9,12 @@ Item {
     id: root
     property var pluginApi: null
 
+    // FIX: Put these in Main.qml as well to defeat the QML race condition
+    readonly property bool allowAttach: false
+    readonly property bool panelAnchorHorizontalCenter: true
+    readonly property bool panelAnchorVerticalCenter: true
+    readonly property color panelBackgroundColor: "transparent"
+
     IpcHandler {
         target: "plugin:vinyl-launcher"
 
