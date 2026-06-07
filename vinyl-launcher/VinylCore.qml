@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 
-import "Providers"
+import qs.Modules.Panels.Launcher.Providers
 import qs.Commons
 import qs.Services.Keyboard
 import qs.Services.UI
@@ -87,7 +87,7 @@ Rectangle {
   }
 
   function updateResults() {
-    results = appsProvider.getResults(searchText);
+    results = appsProvider.getResults(searchText); console.log("RESULTS LENGTH: " + results.length);
     selectedIndex = 0;
   }
 
