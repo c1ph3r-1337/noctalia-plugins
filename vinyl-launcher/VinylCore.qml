@@ -11,9 +11,8 @@ import qs.Services.UI
 import qs.Widgets
 
 // Space launcher core - Rotational Disk UI (Fixed Initialization)
-Rectangle {
+Item {
   id: root
-  color: "transparent"
 
   // External interface - set by parent
   property var screen: null
@@ -155,17 +154,18 @@ Rectangle {
   Rectangle {
     id: outerRing
     anchors.centerIn: parent
-    width: Math.min(parent.width, parent.height)
+    width: Math.floor(Math.min(parent.width, parent.height) / 2) * 2
     height: width
     radius: width / 2
     color: Color.mSurface
     border.width: 0
+    border.color: "transparent"
 
     // 2. Inner Light Circle
     Rectangle {
       id: innerCircle
       anchors.centerIn: parent
-      width: parent.width * 0.6
+      width: Math.floor((parent.width * 0.6) / 2) * 2
       height: width
       radius: width / 2
       color: Color.mSurfaceVariant
