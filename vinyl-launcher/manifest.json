@@ -3,7 +3,7 @@
   "name": "Vinyl Launcher",
   "version": "1.0.0",
   "minNoctaliaVersion": "3.6.0",
-  "author": "Antigravity",
+  "author": "c1ph3r-1337",
   "description": "A rotational disc app launcher plugin",
   "tags": ["Launcher"],
   "entryPoints": {
