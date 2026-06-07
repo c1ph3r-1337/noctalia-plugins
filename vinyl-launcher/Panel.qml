@@ -16,7 +16,7 @@ Item {
     readonly property bool panelAnchorVerticalCenter: true
     readonly property color panelBackgroundColor: "transparent"
 
-    property real contentPreferredWidth: Math.round(500 * Style.uiScaleRatio)
+    property real contentPreferredWidth: screen ? Math.round(screen.height * 0.463) : Math.round(500 * Style.uiScaleRatio)
     property real contentPreferredHeight: contentPreferredWidth
 
     implicitWidth: contentPreferredWidth
