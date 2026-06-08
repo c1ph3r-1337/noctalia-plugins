@@ -86,7 +86,7 @@ Item {
   }
 
   function updateResults() {
-    results = appsProvider.getResults(searchText); console.log("RESULTS LENGTH: " + results.length);
+    results = appsProvider.getResults(searchText);
     selectedIndex = 0;
   }
 
@@ -341,7 +341,7 @@ Item {
 
     NText {
       anchors.centerIn: parent
-      text: "Search: " + root.searchText
+      text: (root.pluginApi ? root.pluginApi.tr("plugin.vinyl-launcher.search") : "Search:") + " " + root.searchText
       color: Color.mOnSurface
       font.italic: true
       pointSize: Style.fontSizeS
